@@ -555,7 +555,6 @@
 								"computeType": "General"
 							},
 							"traceLevel": "Fine",
-							"runConcurrently": false,
 							"continueOnError": true
 						}
 					},
@@ -584,7 +583,6 @@
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
-									"wildcardFolderPath": "OUTPUT",
 									"wildcardFileName": "FailedTransactions.csv",
 									"enablePartitionDiscovery": false
 								},
