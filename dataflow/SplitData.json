@@ -1,12 +1,12 @@
 {
-	"name": "dataflow1",
+	"name": "SplitData",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "TransactionSqlSource",
 						"type": "DatasetReference"
 					},
 					"name": "SQL"
@@ -26,13 +26,24 @@
 					"name": "Excel"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SqlSuccessSink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "Union1"
+				},
+				{
+					"name": "ConditionalSplit1"
 				}
 			],
-			"script": "source(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SQL\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSV\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Excel\nSQL, CSV, Excel union(byName: true)~> Union1"
+			"script": "source(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SQL\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSV\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Excel\nSQL, CSV, Excel union(byName: true)~> Union1\nUnion1 split(Status == \"Success\",\n\tStatus == \"OnHold\",\n\tdisjoint: false) ~> ConditionalSplit1@(TransactionStatusSuccess, TransactionStstusOnHold, TransactionStatusFailed)\nConditionalSplit1@TransactionStatusSuccess sink(input(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
 		}
 	}
 }
