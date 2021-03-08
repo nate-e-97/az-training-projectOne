@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AZBlob2'"
 		},
+		"AZBlob2All_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AZBlob2All'"
+		},
 		"AZCosmosMongo_properties_typeProperties_database": {
 			"type": "string",
 			"defaultValue": "projectOneOnholdSink"
@@ -81,6 +85,19 @@
 				"type": "AzureBlobStorage",
 				"typeProperties": {
 					"connectionString": "[parameters('AZBlob2_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AZBlob2All')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AZBlob2All_connectionString')]"
 				}
 			},
 			"dependsOn": []
@@ -294,7 +311,81 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/V2Sink')]",
+			"name": "[concat(parameters('factoryName'), '/AllTransactionsSink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AZBlob2All",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "project-one-all-transactions"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AZBlob2All')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TempFailSink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AZBlob1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "transaction-source-blobs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "TransactionID",
+						"type": "String"
+					},
+					{
+						"name": "FromAccountNumber",
+						"type": "String"
+					},
+					{
+						"name": "ToAccountNumber",
+						"type": "String"
+					},
+					{
+						"name": "Amount",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AZBlob1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnHoldSink')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -314,7 +405,28 @@
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
-				"schema": []
+				"schema": [
+					{
+						"name": "TransactionID",
+						"type": "String"
+					},
+					{
+						"name": "FromAccountNumber",
+						"type": "String"
+					},
+					{
+						"name": "ToAccountNumber",
+						"type": "String"
+					},
+					{
+						"name": "Amount",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AZBlob2')]"
@@ -360,21 +472,21 @@
 						},
 						{
 							"dataset": {
-								"referenceName": "V2Sink",
+								"referenceName": "OnHoldSink",
 								"type": "DatasetReference"
 							},
 							"name": "sink2"
 						},
 						{
 							"dataset": {
-								"referenceName": "V2Sink",
+								"referenceName": "TempFailSink",
 								"type": "DatasetReference"
 							},
 							"name": "sink3"
 						},
 						{
 							"dataset": {
-								"referenceName": "V2Sink",
+								"referenceName": "AllTransactionsSink",
 								"type": "DatasetReference"
 							},
 							"name": "AllTransactions"
@@ -388,7 +500,7 @@
 							"name": "ConditionalSplit1"
 						}
 					],
-					"script": "source(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SQL\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Excel\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSV\nSQL, Excel, CSV union(byName: true)~> Union1\nUnion1 split(Status == \"Success\",\n\tStatus == \"OnHold\",\n\tdisjoint: false) ~> ConditionalSplit1@(TransactionStatusSuccess, TransactionStatusOnHold, TransactionStatusFailed)\nConditionalSplit1@TransactionStatusSuccess sink(input(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1\nConditionalSplit1@TransactionStatusOnHold sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['OnHoldTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2\nConditionalSplit1@TransactionStatusFailed sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['FailedTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink3\nUnion1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['AllTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> AllTransactions"
+					"script": "source(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SQL\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Excel\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSV\nSQL, Excel, CSV union(byName: true)~> Union1\nUnion1 split(Status == \"Success\",\n\tStatus == \"OnHold\",\n\tdisjoint: false) ~> ConditionalSplit1@(TransactionStatusSuccess, TransactionStatusOnHold, TransactionStatusFailed)\nConditionalSplit1@TransactionStatusSuccess sink(input(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1\nConditionalSplit1@TransactionStatusOnHold sink(input(\n\t\tTransactionID as string,\n\t\tFromAccountNumber as string,\n\t\tToAccountNumber as string,\n\t\tAmount as string,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['OnHoldTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2\nConditionalSplit1@TransactionStatusFailed sink(input(\n\t\tTransactionID as string,\n\t\tFromAccountNumber as string,\n\t\tToAccountNumber as string,\n\t\tAmount as string,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['FailedTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink3\nUnion1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['AllTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> AllTransactions"
 				}
 			},
 			"dependsOn": [
@@ -396,17 +508,19 @@
 				"[concat(variables('factoryId'), '/datasets/TransactionExcelSource')]",
 				"[concat(variables('factoryId'), '/datasets/TransactionCSVSource')]",
 				"[concat(variables('factoryId'), '/datasets/SqlSuccessSink')]",
-				"[concat(variables('factoryId'), '/datasets/V2Sink')]"
+				"[concat(variables('factoryId'), '/datasets/OnHoldSink')]",
+				"[concat(variables('factoryId'), '/datasets/TempFailSink')]",
+				"[concat(variables('factoryId'), '/datasets/AllTransactionsSink')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ProjectOneADFPipeline')]",
+			"name": "[concat(parameters('factoryName'), '/ProjectOne')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "StartFlow",
+						"name": "Data flow1",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -441,11 +555,11 @@
 						}
 					},
 					{
-						"name": "CopyFailsToMongo",
+						"name": "Copy data1",
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "StartFlow",
+								"activity": "Data flow1",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -481,7 +595,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "V2Sink",
+								"referenceName": "TempFailSink",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -499,8 +613,38 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/SplitData')]",
-				"[concat(variables('factoryId'), '/datasets/V2Sink')]",
+				"[concat(variables('factoryId'), '/datasets/TempFailSink')]",
 				"[concat(variables('factoryId'), '/datasets/MongoFailSink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RunEvery45Minutes')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "ProjectOne",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 45,
+						"startTime": "2021-03-08T17:07:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ProjectOne')]"
 			]
 		}
 	]

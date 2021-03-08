@@ -17,6 +17,9 @@
 		"AZBlob2_connectionString": {
 			"value": ""
 		},
+		"AZBlob2All_connectionString": {
+			"value": ""
+		},
 		"AZCosmosMongo_properties_typeProperties_database": {
 			"value": "projectOneOnholdSink"
 		}
