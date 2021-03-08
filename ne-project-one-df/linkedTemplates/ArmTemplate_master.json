@@ -11,14 +11,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AZBlob1'"
 		},
-		"AZSqlDB_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AZSqlDB'"
-		},
-		"AZCosmosMongo_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AZCosmosMongo'"
-		},
 		"AZBlob2_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AZBlob2'"
@@ -26,6 +18,14 @@
 		"AZBlob2All_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AZBlob2All'"
+		},
+		"AZCosmosMongo_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AZCosmosMongo'"
+		},
+		"AZSqlDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AZSqlDB'"
 		},
 		"AZCosmosMongo_properties_typeProperties_database": {
 			"type": "string",
@@ -61,17 +61,17 @@
 					"AZBlob1_connectionString": {
 						"value": "[parameters('AZBlob1_connectionString')]"
 					},
-					"AZSqlDB_connectionString": {
-						"value": "[parameters('AZSqlDB_connectionString')]"
-					},
-					"AZCosmosMongo_connectionString": {
-						"value": "[parameters('AZCosmosMongo_connectionString')]"
-					},
 					"AZBlob2_connectionString": {
 						"value": "[parameters('AZBlob2_connectionString')]"
 					},
 					"AZBlob2All_connectionString": {
 						"value": "[parameters('AZBlob2All_connectionString')]"
+					},
+					"AZCosmosMongo_connectionString": {
+						"value": "[parameters('AZCosmosMongo_connectionString')]"
+					},
+					"AZSqlDB_connectionString": {
+						"value": "[parameters('AZSqlDB_connectionString')]"
 					},
 					"AZCosmosMongo_properties_typeProperties_database": {
 						"value": "[parameters('AZCosmosMongo_properties_typeProperties_database')]"

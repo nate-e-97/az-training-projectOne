@@ -8,16 +8,16 @@
 		"AZBlob1_connectionString": {
 			"value": ""
 		},
-		"AZSqlDB_connectionString": {
+		"AZBlob2_connectionString": {
+			"value": ""
+		},
+		"AZBlob2All_connectionString": {
 			"value": ""
 		},
 		"AZCosmosMongo_connectionString": {
 			"value": ""
 		},
-		"AZBlob2_connectionString": {
-			"value": ""
-		},
-		"AZBlob2All_connectionString": {
+		"AZSqlDB_connectionString": {
 			"value": ""
 		},
 		"AZCosmosMongo_properties_typeProperties_database": {
