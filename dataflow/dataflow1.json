@@ -1,0 +1,38 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					},
+					"name": "SQL"
+				},
+				{
+					"dataset": {
+						"referenceName": "TransactionCSVSource",
+						"type": "DatasetReference"
+					},
+					"name": "CSV"
+				},
+				{
+					"dataset": {
+						"referenceName": "TransactionExcelSource",
+						"type": "DatasetReference"
+					},
+					"name": "Excel"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "Union1"
+				}
+			],
+			"script": "source(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SQL\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSV\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Excel\nSQL, CSV, Excel union(byName: true)~> Union1"
+		}
+	}
+}

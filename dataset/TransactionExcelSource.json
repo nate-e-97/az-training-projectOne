@@ -1,0 +1,42 @@
+{
+	"name": "TransactionExcelSource",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AZBlob1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Sheet1",
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "excel-transactions.xlsx",
+				"container": "transaction-source-blobs"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": [
+			{
+				"name": "TransactionID",
+				"type": "String"
+			},
+			{
+				"name": "FromAccountNumber",
+				"type": "String"
+			},
+			{
+				"name": "ToAccountNumber",
+				"type": "String"
+			},
+			{
+				"name": "Amount",
+				"type": "String"
+			},
+			{
+				"name": "Status",
+				"type": "String"
+			}
+		]
+	}
+}

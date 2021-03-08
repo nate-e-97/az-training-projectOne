@@ -1,0 +1,41 @@
+{
+	"name": "SqlSuccessSink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AZSqlDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "TransactionID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FromAccountNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ToAccountNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Amount",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Status",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "SuccessSink"
+		}
+	}
+}

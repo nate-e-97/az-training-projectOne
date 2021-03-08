@@ -1,0 +1,44 @@
+{
+	"name": "TransactionCSVSource",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AZBlob1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "csv-transaction.csv",
+				"container": "transaction-source-blobs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "TransactionID",
+				"type": "String"
+			},
+			{
+				"name": "FromAccountNumber",
+				"type": "String"
+			},
+			{
+				"name": "ToAccountNumber",
+				"type": "String"
+			},
+			{
+				"name": "Amount",
+				"type": "String"
+			},
+			{
+				"name": "Status",
+				"type": "String"
+			}
+		]
+	}
+}
