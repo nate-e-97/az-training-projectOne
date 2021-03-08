@@ -1,0 +1,77 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ne-project-one-df"
+		},
+		"AZBlob1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AZBlob1'"
+		},
+		"AZSqlDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AZSqlDB'"
+		},
+		"AZCosmosMongo_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AZCosmosMongo'"
+		},
+		"AZBlob2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AZBlob2'"
+		},
+		"AZCosmosMongo_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "projectOneOnholdSink"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ne-project-one-df_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AZBlob1_connectionString": {
+						"value": "[parameters('AZBlob1_connectionString')]"
+					},
+					"AZSqlDB_connectionString": {
+						"value": "[parameters('AZSqlDB_connectionString')]"
+					},
+					"AZCosmosMongo_connectionString": {
+						"value": "[parameters('AZCosmosMongo_connectionString')]"
+					},
+					"AZBlob2_connectionString": {
+						"value": "[parameters('AZBlob2_connectionString')]"
+					},
+					"AZCosmosMongo_properties_typeProperties_database": {
+						"value": "[parameters('AZCosmosMongo_properties_typeProperties_database')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
