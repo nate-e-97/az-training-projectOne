@@ -1,0 +1,21 @@
+{
+	"name": "AllTransactionsSink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AZBlob2All",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "project-one-all-transactions"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
