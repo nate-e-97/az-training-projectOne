@@ -1,0 +1,89 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ne-project-one-df"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SplitData')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "TransactionSqlSource",
+								"type": "DatasetReference"
+							},
+							"name": "SQL"
+						},
+						{
+							"dataset": {
+								"referenceName": "TransactionExcelSource",
+								"type": "DatasetReference"
+							},
+							"name": "Excel"
+						},
+						{
+							"dataset": {
+								"referenceName": "TransactionCSVSource",
+								"type": "DatasetReference"
+							},
+							"name": "CSV"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "SqlSuccessSink",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"dataset": {
+								"referenceName": "V2Sink",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						},
+						{
+							"dataset": {
+								"referenceName": "V2Sink",
+								"type": "DatasetReference"
+							},
+							"name": "sink3"
+						},
+						{
+							"dataset": {
+								"referenceName": "V2Sink",
+								"type": "DatasetReference"
+							},
+							"name": "AllTransactions"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Union1"
+						},
+						{
+							"name": "ConditionalSplit1"
+						}
+					],
+					"script": "source(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SQL\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Excel\nsource(output(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as float,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSV\nSQL, Excel, CSV union(byName: true)~> Union1\nUnion1 split(Status == \"Success\",\n\tStatus == \"OnHold\",\n\tdisjoint: false) ~> ConditionalSplit1@(TransactionStatusSuccess, TransactionStatusOnHold, TransactionStatusFailed)\nConditionalSplit1@TransactionStatusSuccess sink(input(\n\t\tTransactionID as integer,\n\t\tFromAccountNumber as integer,\n\t\tToAccountNumber as integer,\n\t\tAmount as double,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1\nConditionalSplit1@TransactionStatusOnHold sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['OnHoldTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink2\nConditionalSplit1@TransactionStatusFailed sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['FailedTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink3\nUnion1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['AllTransactions.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> AllTransactions"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
