@@ -181,7 +181,7 @@
 				"type": "CosmosDbMongoDbApiCollection",
 				"schema": [],
 				"typeProperties": {
-					"collection": "OnHoldTransactions"
+					"collection": "FailedTransactions"
 				}
 			},
 			"dependsOn": [
