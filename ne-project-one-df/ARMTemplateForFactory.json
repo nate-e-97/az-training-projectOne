@@ -156,6 +156,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
+						"folderPath": "OUTPUT",
 						"container": "project-one-all-transactions"
 					},
 					"columnDelimiter": ",",
