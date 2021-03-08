@@ -43,7 +43,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "V2Sink",
+						"referenceName": "AllTransactionsSink",
 						"type": "DatasetReference"
 					},
 					"name": "sink3"
