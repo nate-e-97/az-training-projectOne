@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"folderPath": "OUTPUT",
 				"container": "project-one-onhold-sink"
 			},
 			"columnDelimiter": ",",
