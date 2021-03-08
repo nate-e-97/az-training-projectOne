@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "FailedTransactions.csv",
 				"container": "transaction-source-blobs"
 			},
 			"columnDelimiter": ",",
