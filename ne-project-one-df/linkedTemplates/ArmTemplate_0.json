@@ -555,7 +555,8 @@
 								"computeType": "General"
 							},
 							"traceLevel": "Fine",
-							"runConcurrently": true
+							"runConcurrently": false,
+							"continueOnError": true
 						}
 					},
 					{
