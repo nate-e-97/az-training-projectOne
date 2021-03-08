@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "AllTransactions.csv",
 				"container": "project-one-all-transactions"
 			},
 			"columnDelimiter": ",",
